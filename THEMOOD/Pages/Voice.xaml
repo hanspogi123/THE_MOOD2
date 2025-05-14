@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:THEMOOD.ViewModels"
+             xmlns:models="clr-namespace:THEMOOD.Models"
+             xmlns:converters="clr-namespace:THEMOOD.Converters"
+             xmlns:controls="clr-namespace:THEMOOD.Controls"
+             xmlns:behaviors="clr-namespace:THEMOOD.Behaviors"
+             x:Class="THEMOOD.Pages.Voice"
+             x:DataType="viewmodels:VoiceViewModel">
+
+    <ContentView.Resources>
+        <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+        <converters:BoolToAlignmentConverter x:Key="BoolToAlignmentConverter"/>
+    </ContentView.Resources>
+
+    <Grid RowDefinitions="Auto, *, Auto" Padding="20" BackgroundColor="#f8f8f8">
+        <!-- Header -->
+        <Grid Grid.Row="0" 
+              ColumnDefinitions="*, Auto, Auto" 
+              Padding="15"
+              BackgroundColor="#f0a5ef">
+            <Label Text="Voice Assistant" 
+                   FontSize="24"
+                   FontFamily="GentySans"
+                   TextColor="Black"
+                   VerticalOptions="Center" />
+            <Button Grid.Column="1"
+                    Text="Clear"
+                    Command="{Binding ClearConversationCommand}"
+                    BackgroundColor="#ff69b4"
+                    TextColor="White"
+                    FontFamily="GentySans"
+                    Padding="15,8"
+                    CornerRadius="20"
+                    Margin="0,0,10,0">
+                <Button.Behaviors>
+                    <behaviors:SoundEffectBehavior SoundType="button" />
+                </Button.Behaviors>
+            </Button>
+            <Button Grid.Column="2"
+                    Text="← Back"
+                    Command="{Binding NavigateToChatCommand}"
+                    BackgroundColor="#ff69b4"
+                    TextColor="White"
+                    FontFamily="GentySans"
+                    Padding="15,8"
+                    CornerRadius="20">
+                <Button.Behaviors>
+                    <behaviors:SoundEffectBehavior SoundType="navigation" />
+                </Button.Behaviors>
+            </Button>
+        </Grid>
+
+        <!-- Conversation Display -->
+        <Border Grid.Row="1" 
+                Stroke="Transparent"
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 12"
+                BackgroundColor="White"
+                Margin="0,0,0,20">
+            <Grid Padding="10,5">
+                <CollectionView ItemsSource="{Binding Messages}"
+                              SelectionMode="None"
+                              ItemsUpdatingScrollMode="KeepLastItemInView"
+                              x:Name="MessagesCollection">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:VoiceMessage">
+                            <Grid Padding="5" 
+                                  Margin="0,5">
+                                <Frame BorderColor="Transparent"
+                                       CornerRadius="20"
+                                       Padding="15,10"
+                                       HasShadow="False"
+                                       BackgroundColor="{Binding IsFromUser, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#f0a5ef,White'}"
+                                       HorizontalOptions="{Binding IsFromUser, Converter={StaticResource BoolToAlignmentConverter}, ConverterParameter='End,Start'}"
+                                       MaximumWidthRequest="280">
+                                    <Frame.Shadow>
+                                        <Shadow Brush="#20000000"
+                                               Offset="0,2"
+                                               Radius="4" />
+                                    </Frame.Shadow>
+                                    <VerticalStackLayout Spacing="4">
+                                        <Label Text="{Binding Transcription}"
+                                               TextColor="Black"
+                                               FontFamily="GentySans"
+                                               FontAttributes="None"
+                                               LineBreakMode="WordWrap"
+                                               FontSize="16"/>
+                                        <Label Text="{Binding Timestamp, StringFormat='{0:HH:mm}'}"
+                                               TextColor="Gray"
+                                               FontSize="11"
+                                               FontFamily="GentySans"
+                                               FontAttributes="None"
+                                               Opacity="0.7"
+                                               HorizontalOptions="End"/>
+                                    </VerticalStackLayout>
+                                </Frame>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.EmptyView>
+                        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center">
+                            <Label Text="Tap the microphone button to start recording and tap again to stop recording"
+                                   TextColor="Gray"
+                                   FontFamily="GentySans"
+                                   FontAttributes="None"
+                                   FontSize="14"
+                                   Opacity="0.7"
+                                   HorizontalOptions="Center"/>
+                        </VerticalStackLayout>
+                    </CollectionView.EmptyView>
+                </CollectionView>
+
+                <!-- Loading Indicator -->
+                <controls:LoadingIndicator IsVisible="{Binding IsTranscribing}"
+                                         LoadingText="Transcribing your message..."
+                                         Margin="15,5,15,0"
+                                         VerticalOptions="Center"
+                                         HorizontalOptions="Center"/>
+
+                <!-- Typing Indicator -->
+                <controls:TypingIndicator IsVisible="{Binding IsTyping}"
+                                        Margin="15,5,15,0"
+                                        VerticalOptions="End"/>
+            </Grid>
+        </Border>
+
+        <!-- Recording Controls -->
+        <Grid Grid.Row="2" ColumnDefinitions="*, Auto, *" Padding="0,0,0,15">
+            <Border Grid.Column="1"
+                    StrokeThickness="0"
+                    BackgroundColor="{Binding IsRecording, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#ff1493,#f0a5ef'}"
+                    StrokeShape="RoundRectangle 30"
+                    HeightRequest="65"
+                    WidthRequest="65"
+                    HorizontalOptions="Center">
+                <Border.Shadow>
+                    <Shadow Brush="#40000000"
+                           Offset="0,3"
+                           Radius="5" />
+                </Border.Shadow>
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding ToggleRecordingCommand}">
+                        <TapGestureRecognizer.Behaviors>
+                            <behaviors:SoundEffectBehavior SoundType="button" />
+                        </TapGestureRecognizer.Behaviors>
+                    </TapGestureRecognizer>
+                </Border.GestureRecognizers>
+
+                <Grid>
+                    <!-- Microphone Icon -->
+                    <Path Data="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"
+                          Fill="White"
+                          HorizontalOptions="Center"
+                          VerticalOptions="Center"
+                          HeightRequest="28"
+                          WidthRequest="28"/>
+
+                    <!-- Recording Indicator -->
+                    <Ellipse Fill="#FF0000"
+                             HeightRequest="12"
+                             WidthRequest="12"
+                             HorizontalOptions="End"
+                             VerticalOptions="Start"
+                             Margin="0,12,12,0"
+                             Opacity="0.8"
+                             IsVisible="{Binding IsRecording}"/>
+
+                    <!-- Processing Indicator -->
+                    <ActivityIndicator IsRunning="{Binding IsProcessing}"
+                                       IsVisible="{Binding IsProcessing}"
+                                       Color="White"
+                                       HeightRequest="28"
+                                       WidthRequest="28"
+                                       HorizontalOptions="Center"
+                                       VerticalOptions="Center"/>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</ContentView>

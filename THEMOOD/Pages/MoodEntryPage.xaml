@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:THEMOOD.ViewModels"
+             xmlns:local="clr-namespace:THEMOOD.Pages"
+             xmlns:controls="clr-namespace:THEMOOD.Controls"
+             xmlns:micro="clr-namespace:Microcharts.Maui;assembly=Microcharts.Maui"
+             x:Class="THEMOOD.Pages.MoodEntryPage">
+
+    <ContentView.BindingContext>
+        <vm:MoodEntry_VM/>
+    </ContentView.BindingContext>
+
+    <ScrollView>
+        <VerticalStackLayout Spacing="15" Padding="10">
+            <!-- Chart View -->
+            <Frame CornerRadius="15" BackgroundColor="#f5f5f5" Margin="5" Padding="10" Style="{StaticResource FrameStyle}">
+                <VerticalStackLayout>
+                    <Label Text="Mood Distribution" 
+                           FontFamily="GentySans"
+                           TextColor="Black"
+                           FontSize="16" 
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center" 
+                           Margin="0,0,0,5"/>
+                    <micro:ChartView x:Name="Chart" HeightRequest="200"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Analysis Section -->
+            <Frame CornerRadius="15" BackgroundColor="#f5f5f5" Margin="5" Padding="10" Style="{StaticResource FrameStyle}">
+                <VerticalStackLayout>
+                    <Label Text="Mood Analysis"
+                           TextColor="Black"
+                           FontSize="16"
+                           FontFamily="GentySans"
+                           FontAttributes="Bold"
+                           HorizontalOptions="Center"
+                           Margin="0,0,0,5"/>
+
+                    <Label x:Name="AnalysisLabel"
+                           Text="AI Analysis on your mood would show after entering at least 3 moods"
+                           TextColor="Black"
+                           TextType="Html"
+                           Margin="5"/>
+                </VerticalStackLayout>
+            </Frame>
+
+            <!-- Add Mood Button -->
+            <Button
+                Text="Add Mood"
+                Clicked="AddMood_Clicked"
+                HorizontalOptions="Center"
+                BackgroundColor="Pink"
+                VerticalOptions="Center" />
+
+            <!-- Mood Entries Collection -->
+            <Label Text="Mood History" 
+                   FontFamily="GentySans"
+                   TextColor="Black"
+                   FontSize="16" 
+                   FontAttributes="Bold" />
+
+            <!-- Mood Entries Collection -->
+            <CollectionView 
+                x:Name="MoodLog"
+                SelectionMode="None"
+                Margin="10"
+                BackgroundColor="Transparent">
+
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:MoodEntry_VM">
+                        <SwipeView>
+                            <!-- Right Swipe Item for Deletion -->
+                            <SwipeView.RightItems>
+                                <SwipeItems Mode="Reveal">
+                                    <!-- This gives a better visual but still won't be truly rounded -->
+                                    <SwipeItem 
+                                        Text="   Delete"
+                                        BackgroundColor="Crimson"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type local:MoodEntryPage}}, Path=DeleteCommand}"
+                                        CommandParameter="{Binding .}">
+                                        <SwipeItem.IconImageSource>
+                                            <FontImageSource Glyph="🗑️" Color="White" Size="20" />
+                                        </SwipeItem.IconImageSource>
+                                    </SwipeItem>
+                                </SwipeItems>
+                            </SwipeView.RightItems>
+
+                            <!-- SwipeView Content -->
+                            <SwipeView.Content>
+                                <Frame 
+                                    CornerRadius="20"
+                                    BorderColor="#E91E63"
+                                    Padding="10"
+                                    HasShadow="True"
+                                    Margin="5">
+
+                                    <Frame.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                            <GradientStop Color="White" Offset="0.0" />
+                                            <GradientStop Color="LightPink" Offset="0.5" />
+                                            <GradientStop Color="Pink" Offset="1.0" />
+                                        </LinearGradientBrush>
+                                    </Frame.Background>
+
+                                    <Grid
+                                        RowDefinitions="Auto, Auto"
+                                        ColumnDefinitions="2*, 3*, 3*"
+                                        ColumnSpacing="10"
+                                        Padding="5">
+
+                                        <!-- Mood Icon -->
+                                        <Label
+                                            Text="{Binding MoodIcon}"
+                                            FontSize="60"
+                                            VerticalOptions="Center"
+                                            HorizontalOptions="Center"
+                                            Grid.Column="0"
+                                            Grid.RowSpan="2" />
+
+                                        <!-- Mood Text -->
+                                        <Label
+                                            Text="{Binding Mood}"
+                                            FontSize="18"
+                                            FontAttributes="Bold"
+                                            TextColor="Black"
+                                            Grid.Column="1" />
+
+                                        <!-- Date -->
+                                        <Label
+                                            Text="{Binding FormattedDate}"
+                                            FontSize="14"
+                                            FontAttributes="Italic"
+                                            TextColor="DimGray"
+                                            Grid.Column="2"
+                                            HorizontalOptions="End" />
+
+                                        <!-- Mood Note -->
+                                        <Label
+                                            Text="{Binding Note}"
+                                            FontSize="14"
+                                            TextColor="Black"
+                                            Grid.Row="1"
+                                            Grid.Column="1"
+                                            Grid.ColumnSpan="2"
+                                            LineBreakMode="WordWrap" />
+                                    </Grid>
+                                </Frame>
+                            </SwipeView.Content>
+                        </SwipeView>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentView>

@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewmodels="clr-namespace:THEMOOD.ViewModels"
+             xmlns:converters="clr-namespace:THEMOOD.Converters"
+             xmlns:controls="clr-namespace:THEMOOD.Controls"
+             xmlns:behaviors="clr-namespace:THEMOOD.Behaviors"
+             x:Class="THEMOOD.Pages.Chat">
+
+    <ContentView.BindingContext>
+        <viewmodels:Chat_VM />
+    </ContentView.BindingContext>
+
+    <ContentView.Resources>
+        <converters:BoolToColorConverter x:Key="BoolToColorConverter"/>
+        <converters:BoolToAlignmentConverter x:Key="ItemAlignment"/>
+        <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+    </ContentView.Resources>
+
+    <Grid RowDefinitions="Auto, *, Auto" BackgroundColor="#f8f8f8">
+        <!-- Header with clear button -->
+        <Grid Grid.Row="0" 
+              ColumnDefinitions="*, Auto, Auto" 
+              Padding="15"
+              BackgroundColor="#f0a5ef">
+            <Label Text="Chat with AI" 
+                   FontSize="24"
+                   FontFamily="GentySans"
+                   TextColor="Black"
+                   VerticalOptions="Center" />
+            <Button Grid.Column="1"
+                    Text="Clear"
+                    Command="{Binding ClearConversationCommand}"
+                    BackgroundColor="#ff69b4"
+                    TextColor="White"
+                    FontFamily="GentySans"
+                    Padding="15,8"
+                    CornerRadius="20"
+                    Margin="0,0,10,0">
+                <Button.Behaviors>
+                    <behaviors:SoundEffectBehavior SoundType="button" />
+                </Button.Behaviors>
+            </Button>
+            <Button Grid.Column="2"
+                    Text="🎤 Voice"
+                    Command="{Binding ToggleVoiceModeCommand}"
+                    BackgroundColor="#ff69b4"
+                    TextColor="White"
+                    FontFamily="GentySans"
+                    Padding="15,8"
+                    CornerRadius="20">
+                <Button.Behaviors>
+                    <behaviors:SoundEffectBehavior SoundType="button" />
+                </Button.Behaviors>
+            </Button>
+        </Grid>
+
+        <!-- Chat messages list -->
+        <Grid Grid.Row="1" Padding="10,5">
+            <CollectionView x:Name="MessagesCollection" 
+                          ItemsSource="{Binding Messages}"
+                          ItemsUpdatingScrollMode="KeepLastItemInView">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="5" 
+                              Margin="0,5" 
+                              ColumnDefinitions="*">
+                            <Frame BorderColor="Transparent"
+                                   CornerRadius="20"
+                                   Padding="15,10"
+                                   HasShadow="False"
+                                   BackgroundColor="{Binding IsFromUser, Converter={StaticResource BoolToColorConverter}, ConverterParameter='#f0a5ef,White'}"
+                                   HorizontalOptions="{Binding IsFromUser, Converter={StaticResource ItemAlignment}, ConverterParameter='End,Start'}"
+                                   MaximumWidthRequest="280">
+                                <Frame.Shadow>
+                                    <Shadow Brush="#20000000"
+                                           Offset="0,2"
+                                           Radius="4" />
+                                </Frame.Shadow>
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="{Binding Text}"
+                                           TextColor="Black"
+                                           FontFamily="GentySans"
+                                           FontAttributes="None"
+                                           LineBreakMode="WordWrap"
+                                           FontSize="16" />
+                                    <Label Text="{Binding Timestamp, StringFormat='{0:HH:mm}'}" 
+                                           TextColor="Gray" 
+                                           FontSize="11"
+                                           FontFamily="GentySans"
+                                           FontAttributes="None"
+                                           Opacity="0.7"
+                                           HorizontalOptions="End" />
+                                </VerticalStackLayout>
+                            </Frame>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            
+            <!-- Typing Indicator -->
+            <controls:TypingIndicator IsVisible="{Binding IsTyping}"
+                                     Margin="15,5,15,0"
+                                     VerticalOptions="End"/>
+        </Grid>
+
+        <!-- Message input area -->
+        <Grid Grid.Row="2" 
+              ColumnDefinitions="*, Auto" 
+              Padding="15,12" 
+              BackgroundColor="#f0a5ef">
+            <Frame Grid.Column="0"
+                   BackgroundColor="White"
+                   CornerRadius="25"
+                   HasShadow="False"
+                   Padding="5"
+                   Margin="0,0,10,0">
+                <Entry Placeholder="Type your message here..." 
+                       Text="{Binding UserMessage}" 
+                       TextColor="Black"
+                       PlaceholderColor="Gray"
+                       FontFamily="GentySans"
+                       FontAttributes="None"
+                       ReturnCommand="{Binding SendMessageCommand}"
+                       Margin="15,0" />
+            </Frame>
+            <Button Grid.Column="1" 
+                    Text="Send"
+                    Command="{Binding SendMessageCommand}" 
+                    IsEnabled="{Binding IsSending, Converter={StaticResource InverseBoolConverter}}"
+                    BackgroundColor="#ff69b4"
+                    TextColor="White"
+                    FontFamily="GentySans"
+                    FontAttributes="None"
+                    Padding="20,8"
+                    CornerRadius="20">
+                <Button.Behaviors>
+                    <behaviors:SoundEffectBehavior SoundType="button" />
+                </Button.Behaviors>
+            </Button>
+        </Grid>
+    </Grid>
+</ContentView>

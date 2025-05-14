@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="THEMOOD.Pages.Game">
+    <Grid RowDefinitions="Auto,*,Auto" BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource Background}}">
+        <Label x:Name="ScoreLabel"
+               Text="Score: 0"
+               FontSize="24"
+               TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimary}}"
+               HorizontalOptions="Center"
+               Margin="0,10"/>
+        
+        <AbsoluteLayout x:Name="GameArea"
+                       Grid.Row="1"
+                       HorizontalOptions="Fill"
+                       VerticalOptions="Fill"/>
+        
+        <Button x:Name="StartButton"
+                Grid.Row="2"
+                Text="Start Game"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Primary}}"
+                TextColor="White"
+                CornerRadius="10"
+                Padding="20,10"
+                Margin="0,10"
+                HorizontalOptions="Center"
+                Clicked="StartButton_Clicked"/>
+    </Grid>
+</ContentView>

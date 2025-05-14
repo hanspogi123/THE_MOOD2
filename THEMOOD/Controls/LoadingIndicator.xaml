@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="THEMOOD.Controls.LoadingIndicator">
+    
+    <Frame BackgroundColor="White"
+           BorderColor="#cb6ce6"
+           CornerRadius="25"
+           Padding="20,12"
+           HasShadow="True"
+           HorizontalOptions="Center">
+        <HorizontalStackLayout Spacing="12" 
+                              HorizontalOptions="Center"
+                              VerticalOptions="Center">
+            <ActivityIndicator IsRunning="True"
+                             Color="#cb6ce6"
+                             HeightRequest="20"
+                             WidthRequest="20"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Center"/>
+            <Label Text="{Binding Source={RelativeSource AncestorType={x:Type ContentView}}, Path=LoadingText}"
+                   TextColor="#cb6ce6"
+                   FontFamily="GentySans"
+                   FontSize="14"
+                   VerticalOptions="Center"
+                   HorizontalOptions="Center"/>
+        </HorizontalStackLayout>
+    </Frame>
+</ContentView> 

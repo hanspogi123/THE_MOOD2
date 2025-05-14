@@ -1,0 +1,84 @@
+﻿<?xml version = "1.0" encoding = "UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:THEMOOD"
+             xmlns:converters="clr-namespace:THEMOOD.Converters"
+             x:Class="THEMOOD.App">
+
+    <Application.Resources>
+        <ResourceDictionary>
+
+            <Style x:Key="BaseButtonStyle" TargetType="Button">
+                <Setter Property="FontFamily" Value="GentySans" />
+                <Setter Property="FontSize" Value="17.5" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="WidthRequest" Value="250" />
+                <Setter Property="HeightRequest" Value="50" />
+                <Setter Property="CornerRadius" Value="10" />
+                <Setter Property="BorderWidth" Value="1" />
+                <Setter Property="BorderColor" Value="Black" />
+            </Style>
+
+            <Style x:Key="LightButtonStyle" BasedOn="{StaticResource BaseButtonStyle}" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="White" />
+                <Setter Property="TextColor" Value="Black" />
+            </Style>
+
+            <Style x:Key="DarkButtonStyle" BasedOn="{StaticResource BaseButtonStyle}" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="TextColor" Value="Black" />
+                <Setter Property="Opacity" Value="0.55"/>
+            </Style>
+
+            <Style x:Key="BaseEntryStyle" TargetType="Entry">
+                <Setter Property="FontFamily" Value="Arial" />
+                <Setter Property="FontSize" Value="16" />
+                <Setter Property="BackgroundColor" Value="Transparent" />
+                <Setter Property="WidthRequest" Value="250" />
+            </Style>
+
+            <Style x:Key="EmailEntryStyle" BasedOn="{StaticResource BaseEntryStyle}" TargetType="Entry">
+                <Setter Property="Placeholder" Value="Email" />
+                <Setter Property="TextColor" Value="Blue" />
+            </Style>
+
+            <Style x:Key="PasswordEntryStyle" BasedOn="{StaticResource BaseEntryStyle}" TargetType="Entry">
+                <Setter Property="Placeholder" Value="Password" />
+                <Setter Property="IsPassword" Value="True" />
+            </Style>
+
+            <!-- Gradient Brush -->
+            <LinearGradientBrush x:Key="MoodGradientBrush" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="LightPink" Offset="1.0" />
+                <GradientStop Color="Pink" Offset="0.5" />
+                <GradientStop Color="Beige" Offset="0.0" />
+                <!-- Deep Pink/Magenta -->
+            </LinearGradientBrush>
+
+
+            <!-- Style for Frame using the Brush -->
+            <Style x:Key="FrameStyle" TargetType="Frame">
+                <Setter Property="Background" Value="{StaticResource MoodGradientBrush}" />
+                <Setter Property="BorderColor" Value="Black" />
+                <Setter Property="CornerRadius" Value="20" />
+                <Setter Property="Padding" Value="10" />
+            </Style>
+
+            <converters:BoolToColorConverter x:Key="BoolToColorConverter" />
+            <converters:BoolToOpacityConverter x:Key="BoolToOpacityConverter" />
+            <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
+            <converters:BoolToAlignmentConverter x:Key="ItemAlignment" />
+
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+                
+
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Sound Effects -->
+            <x:String x:Key="ButtonClickSound">button_click.wav</x:String>
+            <x:String x:Key="NavigationSound">navigation.wav</x:String>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
