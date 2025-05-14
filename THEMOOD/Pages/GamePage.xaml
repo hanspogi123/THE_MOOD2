@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="THEMOOD.Pages.GamePage"
+             Shell.NavBarIsVisible="False"
+             NavigationPage.HasNavigationBar="False">
+    <Grid x:Name="MainGrid" RowDefinitions="Auto,*,Auto" BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}">
+        <Grid x:Name="HeaderGrid" ColumnDefinitions="Auto,*,Auto">
+            <Button x:Name="BackButton"
+                    Grid.Column="0"
+                    Text="←"
+                    FontSize="24"
+                    TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}"
+                    BackgroundColor="Transparent"
+                    Margin="10,5"
+                    Clicked="BackButton_Clicked"/>
+            
+            <Label x:Name="ScoreLabel"
+                   Grid.Column="1"
+                   Text="Score: 0"
+                   FontSize="24"
+                   TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}"
+                   HorizontalOptions="Center"
+                   Margin="0,10"/>
+        </Grid>
+        
+        <AbsoluteLayout x:Name="GameArea"
+                        Grid.Row="1"
+                        HorizontalOptions="Fill"
+                        VerticalOptions="Fill"/>
+        
+        <Button x:Name="StartButton"
+                Grid.Row="2"
+                Text="Start Game"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Primary}}"
+                TextColor="White"
+                CornerRadius="10"
+                Padding="20,10"
+                Margin="0,10"
+                HorizontalOptions="Center"
+                Clicked="StartButton_Clicked"/>
+    </Grid>
+</ContentPage> 

@@ -1,9 +1,18 @@
 using THEMOOD.Services;
+using Microsoft.Maui.Controls;
 
 namespace THEMOOD.Behaviors
 {
-    public class SoundEffectBehavior : Behavior<Button>
+    public class SoundEffectBehavior : Behavior<View>
     {
+        private readonly SoundEffectService _soundService;
+
+        public SoundEffectBehavior()
+        {
+            // Get the sound service from DI
+            _soundService = Application.Current.Handler.MauiContext.Services.GetService<SoundEffectService>();
+        }
+
         public static readonly BindableProperty SoundTypeProperty =
             BindableProperty.Create(nameof(SoundType), typeof(string), typeof(SoundEffectBehavior), "button");
 
@@ -13,28 +22,52 @@ namespace THEMOOD.Behaviors
             set => SetValue(SoundTypeProperty, value);
         }
 
-        protected override void OnAttachedTo(Button button)
+        protected override void OnAttachedTo(View element)
         {
-            base.OnAttachedTo(button);
-            button.Clicked += OnButtonClicked;
-        }
-
-        protected override void OnDetachingFrom(Button button)
-        {
-            base.OnDetachingFrom(button);
-            button.Clicked -= OnButtonClicked;
-        }
-
-        private async void OnButtonClicked(object sender, EventArgs e)
-        {
-            if (SoundType.ToLower() == "navigation")
+            base.OnAttachedTo(element);
+            
+            // For Buttons
+            if (element is Button button)
             {
-                await SoundEffectService.Instance.PlayNavigationSound();
+                button.Clicked += OnElementTapped;
+            }
+            // For other elements
+            else
+            {
+                element.GestureRecognizers.Add(new TapGestureRecognizer
+                {
+                    Command = new Command(async () => await OnElementTappedAsync())
+                });
+            }
+        }
+
+        protected override void OnDetachingFrom(View element)
+        {
+            base.OnDetachingFrom(element);
+            
+            if (element is Button button)
+            {
+                button.Clicked -= OnElementTapped;
             }
             else
             {
-                await SoundEffectService.Instance.PlayButtonClickSound();
+                var existingGesture = element.GestureRecognizers.OfType<TapGestureRecognizer>().FirstOrDefault();
+                if (existingGesture != null)
+                {
+                    element.GestureRecognizers.Remove(existingGesture);
+                }
             }
+        }
+
+        private async void OnElementTapped(object sender, EventArgs e)
+        {
+            await OnElementTappedAsync();
+        }
+
+        private Task OnElementTappedAsync()
+        {
+            _soundService?.PlayClick();
+            return Task.CompletedTask;
         }
     }
 } 

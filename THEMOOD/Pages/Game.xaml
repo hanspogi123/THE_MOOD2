@@ -2,28 +2,27 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="THEMOOD.Pages.Game">
-    <Grid RowDefinitions="Auto,*,Auto" BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource Background}}">
-        <Label x:Name="ScoreLabel"
-               Text="Score: 0"
-               FontSize="24"
-               TextColor="{AppThemeBinding Light={StaticResource TextPrimary}, Dark={StaticResource TextPrimary}}"
-               HorizontalOptions="Center"
-               Margin="0,10"/>
-        
-        <AbsoluteLayout x:Name="GameArea"
-                       Grid.Row="1"
-                       HorizontalOptions="Fill"
-                       VerticalOptions="Fill"/>
-        
-        <Button x:Name="StartButton"
-                Grid.Row="2"
-                Text="Start Game"
-                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Primary}}"
-                TextColor="White"
-                CornerRadius="10"
-                Padding="20,10"
-                Margin="0,10"
-                HorizontalOptions="Center"
-                Clicked="StartButton_Clicked"/>
+    <Grid RowDefinitions="*" BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}">
+        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="20">
+            <Image Source="game.png" HeightRequest="100" WidthRequest="100" />
+            <Label Text="Bubble Pop Game" 
+                   FontSize="24" 
+                   FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}"
+                   HorizontalOptions="Center" />
+            <Label Text="Pop as many bubbles as you can in 30 seconds!" 
+                   FontSize="16"
+                   TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}"
+                   HorizontalOptions="Center" />
+            <Button x:Name="StartButton"
+                    Text="Start Game"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Primary}}"
+                    TextColor="White"
+                    CornerRadius="10"
+                    Padding="20,10"
+                    Margin="0,20"
+                    HorizontalOptions="Center"
+                    Clicked="StartButton_Clicked"/>
+        </VerticalStackLayout>
     </Grid>
 </ContentView>

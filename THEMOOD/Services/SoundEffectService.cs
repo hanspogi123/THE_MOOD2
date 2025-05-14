@@ -5,80 +5,31 @@ namespace THEMOOD.Services
     public class SoundEffectService
     {
         private readonly IAudioManager _audioManager;
-        private IAudioPlayer _buttonClickPlayer;
-        private IAudioPlayer _navigationPlayer;
-        private static SoundEffectService _instance;
+        private IAudioPlayer _clickPlayer;
 
-        public static SoundEffectService Instance => _instance ??= new SoundEffectService();
-
-        private SoundEffectService()
+        public SoundEffectService(IAudioManager audioManager)
         {
-            _audioManager = AudioManager.Current;
-            InitializeAudioPlayers();
+            _audioManager = audioManager;
+            InitializeClickSound();
         }
 
-        private async void InitializeAudioPlayers()
+        private void InitializeClickSound()
         {
-            try
+            var assembly = typeof(SoundEffectService).Assembly;
+            using var stream = assembly.GetManifestResourceStream("THEMOOD.Resources.Raw.tap.mp3");
+            
+            if (stream != null)
             {
-                // Load sound effects from embedded resources
-                var assembly = typeof(SoundEffectService).Assembly;
-
-                using var buttonClickStream = assembly.GetManifestResourceStream("THEMOOD.Resources.Raw.button_click.wav");
-                using var navigationStream = assembly.GetManifestResourceStream("THEMOOD.Resources.Raw.navigation.wav");
-
-                if (buttonClickStream != null)
-                {
-                    var audioSource = await _audioManager.CreatePlayerAsync(buttonClickStream);
-                    _buttonClickPlayer = audioSource;
-                }
-
-                if (navigationStream != null)
-                {
-                    var audioSource = await _audioManager.CreatePlayerAsync(navigationStream);
-                    _navigationPlayer = audioSource;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error initializing sound effects: {ex.Message}");
+                _clickPlayer = _audioManager.CreatePlayer(stream);
             }
         }
 
-        public async Task PlayButtonClickSound()
+        public void PlayClick()
         {
-            try
+            if (_clickPlayer != null && !_clickPlayer.IsPlaying)
             {
-                if (_buttonClickPlayer != null && !_buttonClickPlayer.IsPlaying)
-                {
-                    _buttonClickPlayer.Play();
-                }
+                _clickPlayer.Play();
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error playing button click sound: {ex.Message}");
-            }
-        }
-
-        public async Task PlayNavigationSound()
-        {
-            try
-            {
-                if (_navigationPlayer != null && !_navigationPlayer.IsPlaying)
-                {
-                    _navigationPlayer.Play();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error playing navigation sound: {ex.Message}");
-            }
-        }
-
-        public void Dispose()
-        {
-            _buttonClickPlayer?.Dispose();
-            _navigationPlayer?.Dispose();
         }
     }
 } 

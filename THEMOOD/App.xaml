@@ -77,8 +77,8 @@
             </ResourceDictionary.MergedDictionaries>
 
             <!-- Sound Effects -->
-            <x:String x:Key="ButtonClickSound">button_click.wav</x:String>
-            <x:String x:Key="NavigationSound">navigation.wav</x:String>
+            <x:String x:Key="ButtonClickSound">tap.mp3</x:String>
+            <x:String x:Key="NavigationSound">tap.mp3</x:String>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

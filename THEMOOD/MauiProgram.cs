@@ -40,6 +40,7 @@ public static class MauiProgram
         // Register services
         builder.Services.AddSingleton<ConnectivityService>();
         builder.Services.AddSingleton(AudioManager.Current);
+        builder.Services.AddSingleton<SoundEffectService>();
         builder.Services.AddSingleton<OpenAIService>(sp => 
             new OpenAIService(configuration["OpenAIApiKey"]));
 
@@ -49,6 +50,7 @@ public static class MauiProgram
         // Register Pages
         builder.Services.AddTransient<MoodEntryPage>();
         builder.Services.AddTransient<Voice>();
+        builder.Services.AddTransient<GamePage>();
 
         // Register Converters
         builder.Services.AddSingleton<AudioInverseBoolConverter>();

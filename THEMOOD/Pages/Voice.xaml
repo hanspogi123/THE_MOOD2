@@ -140,12 +140,11 @@
                            Offset="0,3"
                            Radius="5" />
                 </Border.Shadow>
+                <Border.Behaviors>
+                    <behaviors:SoundEffectBehavior SoundType="button" />
+                </Border.Behaviors>
                 <Border.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding ToggleRecordingCommand}">
-                        <TapGestureRecognizer.Behaviors>
-                            <behaviors:SoundEffectBehavior SoundType="button" />
-                        </TapGestureRecognizer.Behaviors>
-                    </TapGestureRecognizer>
+                    <TapGestureRecognizer Command="{Binding ToggleRecordingCommand}" />
                 </Border.GestureRecognizers>
 
                 <Grid>

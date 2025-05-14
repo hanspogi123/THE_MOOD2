@@ -16,6 +16,7 @@ namespace THEMOOD
             Routing.RegisterRoute("login", typeof(Logins.Login));
             Routing.RegisterRoute("signup", typeof(Logins.SignUp));
             Routing.RegisterRoute("moodentry", typeof(Pages.MoodEntryPage));
+            Routing.RegisterRoute("gamepage", typeof(Pages.GamePage));
             Routing.RegisterRoute("game", typeof(Pages.Game));
             Routing.RegisterRoute("home", typeof(Pages.Home));
 

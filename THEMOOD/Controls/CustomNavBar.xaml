@@ -47,7 +47,7 @@
                     </DataTrigger>
                 </Label.Triggers>
                 <Label.GestureRecognizers>
-                    <TapGestureRecognizer Command="{Binding NavigateToChatCommand}" />
+                    <TapGestureRecognizer Command="{Binding NavigateToWalletCommand}" />
                 </Label.GestureRecognizers>
             </Label>
         </VerticalStackLayout>
@@ -66,7 +66,7 @@
                 <Image Source="logo_only.png" Aspect="AspectFit" HorizontalOptions="Fill" VerticalOptions="Fill" />
             </Grid>
             <Frame.GestureRecognizers>
-                <TapGestureRecognizer Command="{Binding NavigateToChatCommand}" />
+                <TapGestureRecognizer Command="{Binding NavigateToWalletCommand}" />
             </Frame.GestureRecognizers>
         </Frame>
 

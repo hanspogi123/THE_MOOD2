@@ -116,4 +116,9 @@
 		<EmbeddedResource Include="appsettings.json" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<EmbeddedResource Include="Resources\Raw\tap.mp3" />
+		<EmbeddedResource Include="Resources\Raw\bubblepop.mp3" />
+	</ItemGroup>
+
 </Project>
