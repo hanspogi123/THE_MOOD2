@@ -14,30 +14,54 @@
                     BackgroundColor="Transparent"
                     Margin="10,5"
                     Clicked="BackButton_Clicked"/>
-            
-            <Label x:Name="ScoreLabel"
-                   Grid.Column="1"
-                   Text="Score: 0"
-                   FontSize="24"
-                   TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}"
-                   HorizontalOptions="Center"
-                   Margin="0,10"/>
+
+            <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center">
+                <Label x:Name="ScoreLabel"
+                       Text="Score: 0"
+                       FontSize="24"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}"
+                       HorizontalOptions="Center"
+                       HorizontalTextAlignment="Center"
+                       Margin="0,5"/>
+                <Label x:Name="TimerLabel"
+                       Text="Time: 45"
+                       FontSize="18"
+                       TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}"
+                       HorizontalOptions="Center"
+                       HorizontalTextAlignment="Center"/>
+                <Label x:Name="HighScoreLabel"
+                       Text="High Score: 0"
+                       FontSize="16"
+                       FontAttributes="Italic"
+                       TextColor="{AppThemeBinding Light={StaticResource Gray}, Dark={StaticResource LightGray}}"
+                       HorizontalOptions="Center"
+                       HorizontalTextAlignment="Center"/>
+            </VerticalStackLayout>
+            <!-- Add a spacer in Grid.Column="2" to balance the BackButton -->
+            <BoxView Grid.Column="2" 
+                     WidthRequest="{Binding Source={x:Reference BackButton}, Path=Width}" 
+                     BackgroundColor="Transparent" />
+
         </Grid>
-        
+
         <AbsoluteLayout x:Name="GameArea"
                         Grid.Row="1"
                         HorizontalOptions="Fill"
-                        VerticalOptions="Fill"/>
-        
+                        VerticalOptions="Fill">
+            <!-- Bubbles will be added here dynamically -->
+        </AbsoluteLayout>
+
         <Button x:Name="StartButton"
                 Grid.Row="2"
                 Text="Start Game"
                 BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Primary}}"
                 TextColor="White"
-                CornerRadius="10"
-                Padding="20,10"
-                Margin="0,10"
+                FontAttributes="Bold"
+                CornerRadius="20"
+                Padding="20,12"
+                Margin="40,15"
                 HorizontalOptions="Center"
                 Clicked="StartButton_Clicked"/>
     </Grid>
-</ContentPage> 
+</ContentPage>

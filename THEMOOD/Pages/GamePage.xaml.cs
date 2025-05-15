@@ -16,35 +16,39 @@ public partial class GamePage : ContentPage
 {
     private readonly Random _random = new Random();
     private readonly List<BubbleEntity> _bubbles = new List<BubbleEntity>();
-    private readonly ConcurrentQueue<BubbleEntity> _bubblesToRemove = new ConcurrentQueue<BubbleEntity>();
     private int _score = 0;
+    private int _highScore = 0; // Added for high score
     private bool _isGameRunning = false;
-    private readonly int _maxBubbles = 12;
-    private readonly int _bubbleSpawnDelay = 1200;
+    private readonly int _maxBubbles = 15; // Slightly increased for more action (was 15)
+    private readonly int _bubbleSpawnDelay = 500; // User reverted this value
     private readonly IAudioManager _audioManager;
-    private IAudioPlayer _bubblePopPlayer;
+    // private IAudioPlayer _bubblePopPlayer; // This line was for the old single-player approach
+    private byte[] _bubblePopSoundBytes; // To store sound data for creating multiple players
     private CancellationTokenSource _gameCancellationTokenSource;
     private int _currentGameTime;
     private Task _gameTimerTask;
     private Task _bubbleSpawnerTask;
     private Task _bubbleMoverTask;
-    private readonly SemaphoreSlim _bubblesSemaphore = new SemaphoreSlim(1, 1);
-    private bool _isBusy = false;
+    private readonly object _bubblesLock = new object();
 
     public GamePage(IAudioManager audioManager)
     {
         InitializeComponent();
         _audioManager = audioManager;
         InitializeSoundEffects();
-        
-        var panGesture = new PanGestureRecognizer();
-        panGesture.PanUpdated += OnPanUpdated;
-        GameArea.GestureRecognizers.Add(panGesture);
+
+        // Use a tap gesture recognizer for the entire game area
+        var tapGesture = new TapGestureRecognizer();
+        tapGesture.Tapped += OnGameAreaTapped;
+        GameArea.GestureRecognizers.Add(tapGesture);
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        // Load High Score
+        _highScore = Preferences.Get("HighScore", 0);
+        HighScoreLabel.Text = $"High Score: {_highScore}";
         StartGame();
     }
 
@@ -60,13 +64,16 @@ public partial class GamePage : ContentPage
         {
             var assembly = typeof(GamePage).Assembly;
             using var stream = assembly.GetManifestResourceStream("THEMOOD.Resources.Raw.bubblepop.mp3");
-            
+
             if (stream != null)
             {
                 using var memoryStream = new MemoryStream();
                 await stream.CopyToAsync(memoryStream);
-                memoryStream.Position = 0;
-                _bubblePopPlayer = _audioManager.CreatePlayer(memoryStream);
+                _bubblePopSoundBytes = memoryStream.ToArray(); // Store sound data as byte array
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Error: bubblepop.mp3 not found as embedded resource.");
             }
         }
         catch (Exception ex)
@@ -80,16 +87,23 @@ public partial class GamePage : ContentPage
         if (_isGameRunning)
         {
             bool shouldExit = await DisplayAlert(
-                "Exit Game?", 
-                "Are you sure you want to exit? Your progress will be lost.", 
-                "Exit", 
+                "Exit Game?",
+                "Are you sure you want to exit? Your progress will be lost.",
+                "Exit",
                 "Cancel");
 
             if (!shouldExit)
                 return;
         }
-
         await StopGame();
+
+        // First, ensure the "Game" tab is selected in the NavBar
+        if (THEMOOD.ViewModels.NavBarViewModel.Instance.NavigateToWalletCommand.CanExecute(null))
+        {
+            await THEMOOD.ViewModels.NavBarViewModel.Instance.NavigateToWalletCommand.ExecuteAsync(null);
+        }
+
+        // Then navigate back to MainPage
         await Shell.Current.GoToAsync("..");
     }
 
@@ -103,15 +117,22 @@ public partial class GamePage : ContentPage
         if (_isGameRunning)
             return;
 
+        // Ensure HighScoreLabel reflects the current _highScore value when starting a new game
+        HighScoreLabel.Text = $"High Score: {_highScore}";
+
         _isGameRunning = true;
         _score = 0;
-        _currentGameTime = 30;
+        _currentGameTime = 45; // Extended time for more relaxed gameplay
         ScoreLabel.Text = "Score: 0";
+        TimerLabel.Text = $"Time: {_currentGameTime}"; // Update TimerLabel
         StartButton.IsVisible = false;
 
         // Clear any existing bubbles
-        _bubbles.Clear();
-        GameArea.Children.Clear();
+        lock (_bubblesLock)
+        {
+            _bubbles.Clear();
+            GameArea.Children.Clear();
+        }
 
         // Create new cancellation token and start game
         _gameCancellationTokenSource = new CancellationTokenSource();
@@ -122,73 +143,119 @@ public partial class GamePage : ContentPage
     {
         _isGameRunning = false;
         _gameCancellationTokenSource?.Cancel();
-        _gameCancellationTokenSource?.Dispose();
-        _gameCancellationTokenSource = null;
-        _currentGameTime = 0;
+        // It's safer to dispose CancellationTokenSource after tasks are likely completed or cancelled.
+        // Consider awaiting tasks or adding a small delay if issues arise.
+        // _gameCancellationTokenSource?.Dispose(); 
+        // _gameCancellationTokenSource = null;
+
+        // Check for new high score before resetting score
+        if (_score > _highScore)
+        {
+            _highScore = _score;
+            Preferences.Set("HighScore", _highScore);
+            HighScoreLabel.Text = $"High Score: {_highScore}";
+        }
+
+        _currentGameTime = 0; // Reset timer value
 
         await MainThread.InvokeOnMainThreadAsync(() =>
         {
-            _bubbles.Clear();
-            GameArea.Children.Clear();
+            lock (_bubblesLock)
+            {
+                _bubbles.Clear();
+                GameArea.Children.Clear();
+            }
             StartButton.IsVisible = true;
-            StartButton.Text = "Start Game";
+            StartButton.Text = "Start Game"; // Or "Play Again?"
             ScoreLabel.Text = "Score: 0";
-            _score = 0;
+            TimerLabel.Text = $"Time: {_currentGameTime}"; // Reset timer display
+            // HighScoreLabel is already updated if a new high score was made
+            _score = 0; // Reset score *after* checking for high score
         });
+
+        // Dispose CancellationTokenSource here after operations
+        _gameCancellationTokenSource?.Dispose();
+        _gameCancellationTokenSource = null;
     }
 
-    private void OnPanUpdated(object sender, PanUpdatedEventArgs e)
+    private void OnGameAreaTapped(object sender, TappedEventArgs e)
     {
         if (!_isGameRunning) return;
 
-        if (e.StatusType == GestureStatus.Running)
+        var point = e.GetPosition(GameArea);
+        if (point.HasValue)
         {
-            var touchPoint = new Point(e.TotalX, e.TotalY);
-            CheckBubbleTouch(touchPoint);
+            CheckBubbleTouch(point.Value);
         }
     }
 
     private void CheckBubbleTouch(Point touchPoint)
     {
-        if (_isBusy) return;
+        // We'll use a more generous touch radius for mobile
+        const double TOUCH_RADIUS = 20;
 
-        foreach (var bubble in _bubbles.ToArray())
+        BubbleEntity bubbleToPop = null;
+        double closestDistance = double.MaxValue;
+
+        lock (_bubblesLock)
         {
-            if (bubble.IsPopping) continue;
-
-            var bubbleBounds = new Rect(bubble.PosX, bubble.PosY, bubble.BubbleSize, bubble.BubbleSize);
-            if (bubbleBounds.Contains(touchPoint))
+            foreach (var bubble in _bubbles)
             {
-                BubbleTapped(bubble);
-                break;
+                if (bubble.IsPopping) continue;
+
+                // Calculate distance to bubble center
+                double bubbleCenterX = bubble.PosX + bubble.BubbleSize / 2;
+                double bubbleCenterY = bubble.PosY + bubble.BubbleSize / 2;
+                double distance = Math.Sqrt(Math.Pow(touchPoint.X - bubbleCenterX, 2) + Math.Pow(touchPoint.Y - bubbleCenterY, 2));
+
+                // If touch is inside the bubble (plus padding) and closer than any other bubble
+                if (distance < (bubble.BubbleSize / 2 + TOUCH_RADIUS) && distance < closestDistance)
+                {
+                    bubbleToPop = bubble;
+                    closestDistance = distance;
+                }
             }
+        }
+
+        if (bubbleToPop != null)
+        {
+            BubbleTapped(bubbleToPop);
         }
     }
 
     private async void BubbleTapped(BubbleEntity bubble)
     {
-        if (!_isGameRunning || bubble.IsPopping || _isBusy)
+        if (!_isGameRunning || bubble.IsPopping)
             return;
 
-        _isBusy = true;
+        bubble.IsPopping = true;
+
+        // Calculate points - bigger bubbles are worth less
+        int points = (int)(1200 / bubble.BubbleSize);
+        _score += points;
+        ScoreLabel.Text = $"Score: {_score}";
+
+        PlayBubblePopSound();
 
         try
         {
-            bubble.IsPopping = true;
-
-            int points = (int)(1000 / bubble.BubbleSize);
-            _score += points;
-            ScoreLabel.Text = $"Score: {_score}";
-
-            PlayBubblePopSound();
+            // Show a floating score text
+            ShowFloatingScoreText($"+{points}", bubble.PosX + bubble.BubbleSize / 2, bubble.PosY + bubble.BubbleSize / 2);
 
             if (bubble.BubbleVisual != null)
             {
-                await bubble.BubbleVisual.ScaleTo(1.2, 30, Easing.SpringOut);
-                await bubble.BubbleVisual.ScaleTo(0, 50, Easing.SpringIn);
+                // Make the pop animation more satisfying
+                await Task.WhenAll(
+                    bubble.BubbleVisual.ScaleTo(1.3, 80, Easing.SpringOut),
+                    bubble.BubbleVisual.FadeTo(0.9, 80)
+                );
 
-                await _bubblesSemaphore.WaitAsync();
-                try
+                await Task.WhenAll(
+                    bubble.BubbleVisual.ScaleTo(0, 150, Easing.SpringIn),
+                    bubble.BubbleVisual.FadeTo(0, 150)
+                );
+
+                lock (_bubblesLock)
                 {
                     if (_bubbles.Contains(bubble))
                     {
@@ -196,19 +263,53 @@ public partial class GamePage : ContentPage
                         _bubbles.Remove(bubble);
                     }
                 }
-                finally
-                {
-                    _bubblesSemaphore.Release();
-                }
             }
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Error popping bubble: {ex}");
         }
-        finally
+    }
+
+    private void ShowFloatingScoreText(string text, double x, double y)
+    {
+        try
         {
-            _isBusy = false;
+            var label = new Label
+            {
+                Text = text,
+                TextColor = Colors.White,
+                FontSize = 18,
+                FontAttributes = FontAttributes.Bold,
+                HorizontalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.Center,
+                Shadow = new Shadow
+                {
+                    Brush = Brush.Black,
+                    Opacity = 0.8f,
+                    Offset = new Point(1, 1),
+                    Radius = 4
+                }
+            };
+
+            AbsoluteLayout.SetLayoutBounds(label, new Rect(x, y, 60, 30));
+            GameArea.Children.Add(label);
+
+            // Animate the score floating up and fading out
+            Task.WhenAll(
+                label.TranslateTo(0, -40, 800, Easing.SinOut),
+                label.FadeTo(0, 800)
+            ).ContinueWith(_ =>
+            {
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    GameArea.Children.Remove(label);
+                });
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error showing floating text: {ex}");
         }
     }
 
@@ -216,7 +317,23 @@ public partial class GamePage : ContentPage
     {
         try
         {
-            _bubblePopPlayer?.Play();
+            if (_bubblePopSoundBytes != null && _bubblePopSoundBytes.Length > 0 && _audioManager != null)
+            {
+                // Create a new player for each sound to allow overlapping plays
+                var player = _audioManager.CreatePlayer(new MemoryStream(_bubblePopSoundBytes));
+                player.Play();
+
+                // Optional: Handle player disposal if Plugin.Maui.Audio doesn't do it automatically
+                // for short-lived players. One way is to use the PlaybackEnded event.
+                // player.PlaybackEnded += (s, e) => 
+                // {
+                //     if (s is IAudioPlayer p) p.Dispose();
+                // };
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Cannot play pop sound: sound data or audio manager not available.");
+            }
         }
         catch (Exception ex)
         {
@@ -243,8 +360,40 @@ public partial class GamePage : ContentPage
         {
             if (_currentGameTime <= 0)
             {
-                await StopGame();
+                await GameOver();
             }
+        }
+    }
+
+    private async Task GameOver()
+    {
+        _isGameRunning = false; // Ensure game is marked as not running
+
+        string gameOverMessage = $"Your score: {_score}";
+        if (_score > Preferences.Get("HighScore", 0)) // Check against persisted high score for the message
+        {
+            gameOverMessage += $"\nNEW HIGH SCORE: {_score}!";
+        }
+        else
+        {
+            gameOverMessage += $"\nHigh Score: {Preferences.Get("HighScore", 0)}";
+        }
+
+        // Show the final score
+        await DisplayAlert("Game Over", gameOverMessage, "OK");
+
+        await StopGame();
+
+        // Ensure the "Game" tab is selected (Wallet button in nav)
+        if (THEMOOD.ViewModels.NavBarViewModel.Instance.NavigateToWalletCommand.CanExecute(null))
+        {
+            await THEMOOD.ViewModels.NavBarViewModel.Instance.NavigateToWalletCommand.ExecuteAsync(null);
+        }
+
+        // Then go back to main page
+        if (Shell.Current.Navigation.NavigationStack.Count > 1)
+        {
+            await Shell.Current.GoToAsync("..");
         }
     }
 
@@ -259,13 +408,14 @@ public partial class GamePage : ContentPage
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    StartButton.Text = $"Time: {_currentGameTime}";
+                    TimerLabel.Text = $"Time: {_currentGameTime}"; // Update TimerLabel
                 });
             }
 
-            if (_currentGameTime <= 0)
+            if (_currentGameTime <= 0 && _isGameRunning) // Ensure GameOver is called only if game was running and time ran out
             {
-                _isGameRunning = false;
+                _isGameRunning = false; // Mark game as not running before invoking GameOver
+                MainThread.BeginInvokeOnMainThread(async () => await GameOver());
             }
         }, cancellationToken);
 
@@ -274,11 +424,15 @@ public partial class GamePage : ContentPage
             while (_isGameRunning && !cancellationToken.IsCancellationRequested)
             {
                 await Task.Delay(_bubbleSpawnDelay, cancellationToken);
+
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
-                    if (_bubbles.Count < _maxBubbles)
+                    lock (_bubblesLock)
                     {
-                        CreateBubble();
+                        if (_bubbles.Count < _maxBubbles)
+                        {
+                            CreateBubble();
+                        }
                     }
                 });
             }
@@ -308,15 +462,15 @@ public partial class GamePage : ContentPage
             height = 800;
         }
 
-        int size = _random.Next(60, 140);
+        int size = _random.Next(70, 150); // Slightly larger bubbles for easier tapping
 
         var bubble = new BubbleEntity
         {
             PosX = _random.Next(0, (int)(width - size)),
             PosY = height,
             BubbleSize = size,
-            SpeedX = (_random.NextDouble() * 2 - 1) * 1.5,
-            SpeedY = -(_random.NextDouble() * 2 + 1.5),
+            SpeedX = (_random.NextDouble() * 2.0 - 1.0) * 1.5, // Increased horizontal speed range
+            SpeedY = -(_random.NextDouble() * 2.0 + 1.5), // Increased vertical speed
             BubbleColor = GetRandomColor(),
             IsPopping = false
         };
@@ -328,12 +482,12 @@ public partial class GamePage : ContentPage
             HeightRequest = size,
             HasShadow = true,
             BackgroundColor = bubble.BubbleColor,
-            Opacity = 0.8
+            Opacity = 0.8,
+            BorderColor = Colors.White.WithAlpha(0.4f),
+            InputTransparent = true
         };
 
-        var tapGesture = new TapGestureRecognizer();
-        tapGesture.Tapped += (s, e) => BubbleTapped(bubble);
-        frame.GestureRecognizers.Add(tapGesture);
+        // No need for tap gesture on individual bubbles - we use the game area tap gesture instead
 
         AbsoluteLayout.SetLayoutBounds(frame, new Rect(bubble.PosX, bubble.PosY, size, size));
 
@@ -346,40 +500,45 @@ public partial class GamePage : ContentPage
     {
         List<BubbleEntity> bubblesToRemove = new List<BubbleEntity>();
 
-        foreach (var bubble in _bubbles)
+        lock (_bubblesLock)
         {
-            if (bubble.IsPopping)
-                continue;
-
-            bubble.PosX += bubble.SpeedX;
-            bubble.PosY += bubble.SpeedY;
-
-            double width = this.Width > 0 ? this.Width : 400;
-
-            if (bubble.PosX <= 0 || bubble.PosX >= width - bubble.BubbleSize)
+            foreach (var bubble in _bubbles)
             {
-                bubble.SpeedX = -bubble.SpeedX;
-                bubble.PosX = Math.Clamp(bubble.PosX, 0, width - bubble.BubbleSize);
+                if (bubble.IsPopping)
+                    continue;
+
+                bubble.PosX += bubble.SpeedX;
+                bubble.PosY += bubble.SpeedY;
+
+                double width = this.Width > 0 ? this.Width : 400;
+
+                // Bounce off walls
+                if (bubble.PosX <= 0 || bubble.PosX >= width - bubble.BubbleSize)
+                {
+                    bubble.SpeedX = -bubble.SpeedX;
+                    bubble.PosX = Math.Clamp(bubble.PosX, 0, width - bubble.BubbleSize);
+                }
+
+                // Remove if off screen
+                if (bubble.PosY < -bubble.BubbleSize)
+                {
+                    bubblesToRemove.Add(bubble);
+                    continue;
+                }
+
+                if (bubble.BubbleVisual != null && !bubble.IsPopping)
+                {
+                    AbsoluteLayout.SetLayoutBounds(bubble.BubbleVisual, new Rect(bubble.PosX, bubble.PosY, bubble.BubbleSize, bubble.BubbleSize));
+                }
             }
 
-            if (bubble.PosY < -bubble.BubbleSize)
+            foreach (var bubble in bubblesToRemove)
             {
-                bubblesToRemove.Add(bubble);
-                continue;
-            }
-
-            if (bubble.BubbleVisual != null && !bubble.IsPopping)
-            {
-                AbsoluteLayout.SetLayoutBounds(bubble.BubbleVisual, new Rect(bubble.PosX, bubble.PosY, bubble.BubbleSize, bubble.BubbleSize));
-            }
-        }
-
-        foreach (var bubble in bubblesToRemove)
-        {
-            if (_bubbles.Contains(bubble))
-            {
-                GameArea.Children.Remove((IView)bubble.BubbleVisual);
-                _bubbles.Remove(bubble);
+                if (_bubbles.Contains(bubble))
+                {
+                    GameArea.Children.Remove((IView)bubble.BubbleVisual);
+                    _bubbles.Remove(bubble);
+                }
             }
         }
     }
@@ -411,4 +570,4 @@ public class BubbleEntity
     public Color BubbleColor { get; set; }
     public View BubbleVisual { get; set; }
     public bool IsPopping { get; set; }
-} 
+}
