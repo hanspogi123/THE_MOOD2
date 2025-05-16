@@ -1,6 +1,8 @@
 using System.Text.Json;
 using Firebase.Auth;
 using THEMOOD.Services;
+using THEMOOD.ViewModels;
+using THEMOOD.Pages;
 namespace THEMOOD.Logins;
 public partial class Login : ContentPage
 {
@@ -23,6 +25,19 @@ public partial class Login : ContentPage
             MoodEntryService.Instance.Initialize(auth.User.LocalId);
             
             await DisplayAlert("Success", $"Welcome {auth.User.Email}", "OK");
+            
+            // Create a new Chat view instance
+            var chatView = new Chat();
+            
+            // Set the Chat view as the main content using the NavBarViewModel instance
+            if (NavBarViewModel.Instance.NavigateToChatCommand.CanExecute(null))
+            {
+                await NavBarViewModel.Instance.NavigateToChatCommand.ExecuteAsync(null);
+            }
+
+            NavBarViewModel.SetMainPageContent?.Invoke(chatView);
+
+            // Navigate to main page
             await Shell.Current.GoToAsync("//main");
         }
         catch (FirebaseAuthException authEx)

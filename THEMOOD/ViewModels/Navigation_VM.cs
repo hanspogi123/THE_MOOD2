@@ -103,8 +103,9 @@ namespace THEMOOD.ViewModels
             IsWalletActive = true;
             _currentViewKey = "Game";
 
-            // Use lazy-loaded view - will create the first time it's accessed
-            SetMainPageContent?.Invoke(_viewCache["Game"].Value);
+            // Create a new instance of the Game view each time
+            var gameView = new THEMOOD.Pages.Game();
+            SetMainPageContent?.Invoke(gameView);
 
             return Task.CompletedTask;
         }

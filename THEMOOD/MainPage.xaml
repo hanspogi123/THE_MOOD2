@@ -6,7 +6,7 @@
              x:Class="THEMOOD.MainPage"
              BackgroundImageSource="mainpage_bg.png">
 
-    <Grid RowDefinitions="*, Auto">
+    <Grid RowDefinitions="*, Auto" BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}">
         <!-- Dynamic Content Area -->
         <ContentPresenter x:Name="MainContentArea" Grid.Row="0" />
 

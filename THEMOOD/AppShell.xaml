@@ -13,8 +13,8 @@
     Route="main" />
 
     <ShellContent
-        ContentTemplate="{DataTemplate logins:Login}"
-        Route="login" />
+ContentTemplate="{DataTemplate logins:Login}"
+Route="login" />
 
     <ShellContent
         ContentTemplate="{DataTemplate logins:SignUp}"

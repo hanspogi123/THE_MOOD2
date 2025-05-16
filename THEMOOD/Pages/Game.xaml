@@ -1,28 +1,54 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:behaviors="clr-namespace:THEMOOD.Behaviors"
              x:Class="THEMOOD.Pages.Game">
-    <Grid RowDefinitions="*" BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}">
-        <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="20">
-            <Image Source="game.png" HeightRequest="100" WidthRequest="100" />
-            <Label Text="Bubble Pop Game" 
-                   FontSize="24" 
-                   FontAttributes="Bold"
-                   TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}"
-                   HorizontalOptions="Center" />
-            <Label Text="Pop as many bubbles as you can in 30 seconds!" 
-                   FontSize="16"
-                   TextColor="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}"
-                   HorizontalOptions="Center" />
-            <Button x:Name="StartButton"
-                    Text="Start Game"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource Primary}}"
-                    TextColor="White"
-                    CornerRadius="10"
-                    Padding="20,10"
-                    Margin="0,20"
-                    HorizontalOptions="Center"
-                    Clicked="StartButton_Clicked"/>
-        </VerticalStackLayout>
+    <Grid RowDefinitions="*" BackgroundColor="{AppThemeBinding Light=#f8f8f8, Dark=#1a1a1a}">
+        <Grid Padding="20">
+            <Frame BorderColor="Transparent"
+                   CornerRadius="20"
+                   Padding="20"
+                   HasShadow="False"
+                   BackgroundColor="{AppThemeBinding Light=White, Dark=#2d1b2d}"
+                   VerticalOptions="Center">
+                <Frame.Shadow>
+                    <Shadow Brush="#20000000"
+                           Offset="0,2"
+                           Radius="4" />
+                </Frame.Shadow>
+                <VerticalStackLayout Spacing="20" HorizontalOptions="Center">
+                    <Label Text="Bubble Pop Game" 
+                           FontSize="24"
+                           FontFamily="GentySans"
+                           TextColor="{AppThemeBinding Light=Black, Dark=White}"
+                           HorizontalOptions="Center" />
+                    
+                    <Image Source="game.png" 
+                           HeightRequest="120" 
+                           WidthRequest="120" />
+                    
+                    <Label Text="Pop as many bubbles as you can in 30 seconds!" 
+                           FontSize="16"
+                           FontFamily="GentySans"
+                           TextColor="{AppThemeBinding Light=Gray, Dark=#cccccc}"
+                           HorizontalOptions="Center"
+                           HorizontalTextAlignment="Center"/>
+                    
+                    <Button x:Name="StartButton"
+                            Text="Start Game"
+                            Clicked="StartButton_Clicked"
+                            BackgroundColor="{AppThemeBinding Light=#ff69b4, Dark=#ff69b4}"
+                            TextColor="White"
+                            FontFamily="GentySans"
+                            Padding="20,10"
+                            CornerRadius="20"
+                            Margin="0,20,0,0">
+                        <Button.Behaviors>
+                            <behaviors:SoundEffectBehavior SoundType="button" />
+                        </Button.Behaviors>
+                    </Button>
+                </VerticalStackLayout>
+            </Frame>
+        </Grid>
     </Grid>
-</ContentView>
+</ContentPage>

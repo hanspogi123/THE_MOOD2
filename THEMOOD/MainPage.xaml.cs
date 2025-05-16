@@ -24,13 +24,10 @@ public partial class MainPage : ContentPage
             async popup => await this.ShowPopupAsync(popup)
         );
 
-        // Set default content if you want
-        MainContentArea.Content = new Label
-        {
-            Text = "Welcome to THEMOOD!",
-            HorizontalOptions = LayoutOptions.Center,
-            VerticalOptions = LayoutOptions.Center
-        };
+        // Set Chat view as the initial content
+        var chatView = new THEMOOD.Pages.Chat();
+        MainContentArea.Content = chatView;
+        _currentView = chatView;
 
         // Hook up dynamic content loader
         NavBarViewModel.SetMainPageContent = SetContentWithAnimation;

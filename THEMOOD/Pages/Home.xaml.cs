@@ -1,4 +1,5 @@
 using THEMOOD.Services;
+using Microsoft.Maui.Controls;
 
 namespace THEMOOD.Pages;
 
@@ -16,9 +17,6 @@ public partial class Home : ContentView
 	{
 		try
 		{
-			// Clear mood entries
-			MoodEntryService.Instance.Logout();
-			
 			// Sign out from Firebase
 			await _authService.SignOut();
 			

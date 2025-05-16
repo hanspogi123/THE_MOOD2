@@ -9,6 +9,8 @@ using System.IO;
 using System.Threading;
 using System.Collections.Concurrent;
 using Microsoft.Extensions.DependencyInjection;
+using THEMOOD.ViewModels;
+using THEMOOD.Pages;
 
 namespace THEMOOD.Pages;
 
@@ -97,11 +99,11 @@ public partial class GamePage : ContentPage
         }
         await StopGame();
 
-        // First, ensure the "Game" tab is selected in the NavBar
-        if (THEMOOD.ViewModels.NavBarViewModel.Instance.NavigateToWalletCommand.CanExecute(null))
-        {
-            await THEMOOD.ViewModels.NavBarViewModel.Instance.NavigateToWalletCommand.ExecuteAsync(null);
-        }
+        // Create a new Game view instance
+        var gameView = new Game();
+
+        // Set the Game view as the main content
+        NavBarViewModel.SetMainPageContent?.Invoke(gameView);
 
         // Then navigate back to MainPage
         await Shell.Current.GoToAsync("..");
