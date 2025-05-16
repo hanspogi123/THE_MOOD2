@@ -14,6 +14,6 @@ public partial class Game : ContentView
 
 	private async void StartButton_Clicked(object sender, EventArgs e)
 	{
-		// TODO: Implement game start logic
-	}
+        await Shell.Current.GoToAsync("gamepage");
+    }
 }

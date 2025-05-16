@@ -7,6 +7,20 @@
              BackgroundImageSource="mainpage_bg.png">
 
     <Grid RowDefinitions="*, Auto" BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Black}}">
+        <!-- Exit Button -->
+        <Button x:Name="ExitButton"
+                Text="✕"
+                FontSize="20"
+                WidthRequest="40"
+                HeightRequest="40"
+                CornerRadius="20"
+                BackgroundColor="Transparent"
+                TextColor="White"
+                HorizontalOptions="End"
+                VerticalOptions="Start"
+                Margin="10"
+                Clicked="OnExitButtonClicked"/>
+
         <!-- Dynamic Content Area -->
         <ContentPresenter x:Name="MainContentArea" Grid.Row="0" />
 

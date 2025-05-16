@@ -13,7 +13,8 @@
                              ShouldShowPlaybackControls="True"
                              ShouldKeepScreenOn="True"
                              ShouldMute="False"
-                             HeightRequest="650"
+                             HorizontalOptions="FillAndExpand"
+                             VerticalOptions="FillAndExpand"
                              Aspect="AspectFit" />
 
         <ActivityIndicator x:Name="LoadingIndicator"

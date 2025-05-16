@@ -13,6 +13,13 @@ public partial class Meditation : ContentView
     {
         InitializeComponent();
 
+        // Set height based on platform
+#if WINDOWS
+        VideoPlayer.HeightRequest = 900;
+#else
+        VideoPlayer.HeightRequest = 650;
+#endif
+
         // Use lazy loading for video
         this.Loaded += ContentView_Loaded;
     }

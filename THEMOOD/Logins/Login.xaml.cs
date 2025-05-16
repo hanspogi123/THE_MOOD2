@@ -12,6 +12,18 @@ public partial class Login : ContentPage
         InitializeComponent();
         _authService = new FirebaseAuthService();
         _ = ConnectivityService.Instance;
+
+#if WINDOWS
+        LoginCard.Style = (Style)Resources["LoginCardStyle"];
+        LoginCard.BackgroundColor = Colors.White;
+        LoginCard.HasShadow = true;
+        LoginCard.Padding = new Thickness(36, 32);
+#else
+        LoginCard.Style = null;
+        LoginCard.BackgroundColor = Colors.Transparent;
+        LoginCard.HasShadow = false;
+        LoginCard.Padding = new Thickness(30, 100, 30, 30);
+#endif
     }
 
     private async void OnLoginClicked(object sender, EventArgs e)

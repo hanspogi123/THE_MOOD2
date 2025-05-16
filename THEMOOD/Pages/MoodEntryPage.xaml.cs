@@ -50,6 +50,9 @@ public partial class MoodEntryPage : ContentView
     {
         InitializeComponent();
 
+        // Set platform-specific chart heights
+        SetPlatformSpecificHeights();
+
         // Initialize the DeleteCommand
         DeleteCommand = new Command<MoodEntry_VM>(DeleteMoodEntry);
 
@@ -67,6 +70,23 @@ public partial class MoodEntryPage : ContentView
 
         // Initial mood analysis
         UpdateMoodAnalysis();
+    }
+
+    private void SetPlatformSpecificHeights()
+    {
+        // Check if we're running on Windows
+        if (DeviceInfo.Current.Platform == DevicePlatform.WinUI)
+        {
+            // Increase chart height for Windows
+            Chart.HeightRequest = 400;
+            ChartFrame.HeightRequest = 450;
+        }
+        else
+        {
+            // Standard height for mobile platforms
+            Chart.HeightRequest = 200;
+            ChartFrame.HeightRequest = 240;
+        }
     }
 
     private void MoodEntries_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
@@ -131,8 +151,8 @@ public partial class MoodEntryPage : ContentView
         // Update our class field with the new entries
         entries = chartEntries.ToArray();
 
-        // Update the chart with new entries
-        Chart.Chart = new BarChart
+        // Create a custom chart config with appropriate size based on platform
+        var chartConfig = new BarChart
         {
             Entries = entries,
             LabelTextSize = 30,
@@ -140,6 +160,16 @@ public partial class MoodEntryPage : ContentView
             LabelOrientation = Orientation.Horizontal,
             AnimationDuration = TimeSpan.FromSeconds(1)
         };
+
+        // Modify chart settings based on platform
+        if (DeviceInfo.Current.Platform == DevicePlatform.WinUI)
+        {
+            // Additional Windows-specific chart settings if needed
+            chartConfig.LabelTextSize = 40;
+        }
+
+        // Update the chart with new entries
+        Chart.Chart = chartConfig;
     }
 
     // New method to update mood analysis

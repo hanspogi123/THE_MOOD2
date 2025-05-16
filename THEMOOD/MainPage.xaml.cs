@@ -33,6 +33,23 @@ public partial class MainPage : ContentPage
         NavBarViewModel.SetMainPageContent = SetContentWithAnimation;
     }
 
+    private async void OnExitButtonClicked(object sender, EventArgs e)
+    {
+        try
+        {
+            // Show confirmation dialog
+            bool answer = await DisplayAlert("Exit", "Are you sure you want to exit?", "Yes", "No");
+            if (answer)
+            {
+                Application.Current.Quit();
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error exiting application: {ex.Message}");
+        }
+    }
+
     private async void SetContentWithAnimation(View newView)
     {
         if (newView == _currentView || _isTransitioning) return;
