@@ -27,7 +27,7 @@
                            HeightRequest="120" 
                            WidthRequest="120" />
                     
-                    <Label Text="Pop as many bubbles as you can in 30 seconds!" 
+                    <Label Text="Pop as many bubbles as you can in 45 seconds!" 
                            FontSize="16"
                            FontFamily="GentySans"
                            TextColor="{AppThemeBinding Light=Gray, Dark=#cccccc}"

@@ -51,6 +51,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiAsset Remove="Resources\Raw\bg_music.mp3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Resources\Raw\bg_music.mp3" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <MauiAsset Include="Resources\Videos\meditate1.mp4" />
 	</ItemGroup>
 
@@ -117,6 +125,7 @@
 
 	<ItemGroup>
 		<EmbeddedResource Include="appsettings.json" />
+		<EmbeddedResource Include="Resources\Raw\bg_music.mp3" />
 	</ItemGroup>
 
 	<ItemGroup>

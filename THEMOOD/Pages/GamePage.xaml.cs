@@ -24,20 +24,23 @@ public partial class GamePage : ContentPage
     private readonly int _maxBubbles = 15; // Slightly increased for more action (was 15)
     private readonly int _bubbleSpawnDelay = 500; // User reverted this value
     private readonly IAudioManager _audioManager;
-    // private IAudioPlayer _bubblePopPlayer; // This line was for the old single-player approach
+    private IAudioPlayer _backgroundMusicPlayer;
     private byte[] _bubblePopSoundBytes; // To store sound data for creating multiple players
+    private byte[] _backgroundMusicBytes; // Store the music bytes
     private CancellationTokenSource _gameCancellationTokenSource;
     private int _currentGameTime;
     private Task _gameTimerTask;
     private Task _bubbleSpawnerTask;
     private Task _bubbleMoverTask;
     private readonly object _bubblesLock = new object();
+    private bool _backgroundMusicInitialized = false; // Flag to track initialization
 
     public GamePage(IAudioManager audioManager)
     {
         InitializeComponent();
         _audioManager = audioManager;
         InitializeSoundEffects();
+        InitializeBackgroundMusic();
 
         // Use a tap gesture recognizer for the entire game area
         var tapGesture = new TapGestureRecognizer();
@@ -51,12 +54,76 @@ public partial class GamePage : ContentPage
         // Load High Score
         _highScore = Preferences.Get("HighScore", 0);
         HighScoreLabel.Text = $"High Score: {_highScore}";
+
+        // Start background music with proper error handling and checking
+        PlayBackgroundMusic();
+
         StartGame();
+    }
+
+    private void PlayBackgroundMusic()
+    {
+        try
+        {
+            // Only create a new player if needed
+            if (_backgroundMusicPlayer == null && _backgroundMusicBytes != null && _backgroundMusicBytes.Length > 0)
+            {
+                // Recreate the player if it was disposed
+                _backgroundMusicPlayer = _audioManager.CreatePlayer(new MemoryStream(_backgroundMusicBytes));
+
+                if (_backgroundMusicPlayer != null)
+                {
+                    _backgroundMusicPlayer.Loop = true;
+                    _backgroundMusicPlayer.Volume = 0.5;
+                    _backgroundMusicInitialized = true;
+                    System.Diagnostics.Debug.WriteLine("Background music player created successfully");
+                }
+            }
+
+            // Only play if we have a valid player and it's not already playing
+            if (_backgroundMusicPlayer != null && _backgroundMusicInitialized)
+            {
+                if (!_backgroundMusicPlayer.IsPlaying)
+                {
+                    _backgroundMusicPlayer.Play();
+                    System.Diagnostics.Debug.WriteLine("Background music started playing");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("Background music is already playing");
+                }
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Background music player is null or not initialized");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error playing background music: {ex}");
+            // Try to recover
+            _backgroundMusicPlayer?.Dispose();
+            _backgroundMusicPlayer = null;
+            _backgroundMusicInitialized = false;
+        }
     }
 
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
+        // Stop background music without disposing
+        try
+        {
+            if (_backgroundMusicPlayer != null && _backgroundMusicPlayer.IsPlaying)
+            {
+                _backgroundMusicPlayer.Pause(); // Use Pause instead of Stop to allow resuming
+                System.Diagnostics.Debug.WriteLine("Background music paused");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error pausing background music: {ex}");
+        }
         _ = StopGame();
     }
 
@@ -72,6 +139,7 @@ public partial class GamePage : ContentPage
                 using var memoryStream = new MemoryStream();
                 await stream.CopyToAsync(memoryStream);
                 _bubblePopSoundBytes = memoryStream.ToArray(); // Store sound data as byte array
+                System.Diagnostics.Debug.WriteLine("Bubble pop sound initialized successfully");
             }
             else
             {
@@ -81,6 +149,35 @@ public partial class GamePage : ContentPage
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Error initializing sound effects: {ex}");
+        }
+    }
+
+    private async void InitializeBackgroundMusic()
+    {
+        try
+        {
+            var assembly = typeof(GamePage).Assembly;
+            using var stream = assembly.GetManifestResourceStream("THEMOOD.Resources.Raw.bg_music.mp3");
+
+            if (stream != null)
+            {
+                using var memoryStream = new MemoryStream();
+                await stream.CopyToAsync(memoryStream);
+                _backgroundMusicBytes = memoryStream.ToArray(); // Store the bytes
+                System.Diagnostics.Debug.WriteLine($"Background music bytes loaded: {_backgroundMusicBytes.Length} bytes");
+
+                // We'll create the player when needed in PlayBackgroundMusic()
+                _backgroundMusicInitialized = false;
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine("Error: bg_music.mp3 not found as embedded resource.");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error initializing background music: {ex}");
+            _backgroundMusicInitialized = false;
         }
     }
 
@@ -97,6 +194,10 @@ public partial class GamePage : ContentPage
             if (!shouldExit)
                 return;
         }
+
+        // Clean up and dispose the background music player when truly leaving the game
+        CleanupBackgroundMusic();
+
         await StopGame();
 
         // Create a new Game view instance
@@ -107,6 +208,25 @@ public partial class GamePage : ContentPage
 
         // Then navigate back to MainPage
         await Shell.Current.GoToAsync("..");
+    }
+
+    private void CleanupBackgroundMusic()
+    {
+        try
+        {
+            if (_backgroundMusicPlayer != null)
+            {
+                _backgroundMusicPlayer.Stop();
+                _backgroundMusicPlayer.Dispose();
+                _backgroundMusicPlayer = null;
+                _backgroundMusicInitialized = false;
+                System.Diagnostics.Debug.WriteLine("Background music player disposed");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error disposing background music: {ex}");
+        }
     }
 
     private void StartButton_Clicked(object sender, EventArgs e)
@@ -381,22 +501,16 @@ public partial class GamePage : ContentPage
             gameOverMessage += $"\nHigh Score: {Preferences.Get("HighScore", 0)}";
         }
 
-        // Show the final score
-        await DisplayAlert("Game Over", gameOverMessage, "OK");
-
         await StopGame();
 
-        // Ensure the "Game" tab is selected (Wallet button in nav)
-        if (THEMOOD.ViewModels.NavBarViewModel.Instance.NavigateToWalletCommand.CanExecute(null))
-        {
-            await THEMOOD.ViewModels.NavBarViewModel.Instance.NavigateToWalletCommand.ExecuteAsync(null);
-        }
+        // Create a new Game view instance
+        var gameView = new Game();
 
-        // Then go back to main page
-        if (Shell.Current.Navigation.NavigationStack.Count > 1)
-        {
-            await Shell.Current.GoToAsync("..");
-        }
+        // Set the Game view as the main content
+        NavBarViewModel.SetMainPageContent?.Invoke(gameView);
+
+        // Then navigate back to MainPage
+        await Shell.Current.GoToAsync("..");
     }
 
     private void StartGameTasks(int startTime, CancellationToken cancellationToken)
