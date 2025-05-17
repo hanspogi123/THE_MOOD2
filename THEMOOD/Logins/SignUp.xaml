@@ -6,95 +6,152 @@
              BackgroundImageSource="singup_bg.png"
              Title="SignUp"
              Shell.NavBarIsVisible="False">
-    <!--
-    <ContentPage.BindingContext>
-        <vm:Entry_VM/>
-    </ContentPage.BindingContext>
-    -->
 
-    <ScrollView>
-        <VerticalStackLayout Padding="30,100,30,30" Spacing="17">
-            
-            <!-- Create Text -->
-            <VerticalStackLayout>
-                <Label Text="Create"
-                   FontFamily="GentySans"
-                   FontSize="38"
-                   TextColor="Black" />
-                <Label Text="Account"
-                   FontFamily="GentySans"
-                   FontSize="38"
-                   TextColor="Black" />
-            </VerticalStackLayout>
+    <ContentPage.Resources>
+        <Style x:Key="SignUpCardStyle" TargetType="Frame">
+            <Setter Property="BackgroundColor" Value="White"/>
+            <Setter Property="CornerRadius" Value="24"/>
+            <Setter Property="HasShadow" Value="True"/>
+            <Setter Property="Padding" Value="36,32"/>
+            <Setter Property="WidthRequest" Value="400"/>
+            <Setter Property="MinimumWidthRequest" Value="320"/>
+            <Setter Property="HorizontalOptions" Value="Center"/>
+            <Setter Property="VerticalOptions" Value="Center"/>
+        </Style>
+    </ContentPage.Resources>
 
-            <!-- Spacer to move other controls lower -->
-            <BoxView HeightRequest="20" BackgroundColor="Transparent" Color="Transparent" Opacity="0" />
+    <Grid>
+        <Frame x:Name="SignUpCard"
+               HasShadow="False"
+               BackgroundColor="Transparent">
+            <Frame.Padding>
+                <OnPlatform x:TypeArguments="Thickness">
+                    <On Platform="Android" Value="16,32,16,16" />
+                    <On Platform="iOS" Value="24,60,24,24" />
+                    <On Platform="WinUI" Value="36,32,36,32" />
+                    <On Platform="MacCatalyst" Value="24,60,24,24" />
+                    <On Platform="Tizen" Value="16,32,16,16" />
+                    <On Platform="Default" Value="30,60,30,30" />
+                </OnPlatform>
+            </Frame.Padding>
+            <ScrollView>
+                <VerticalStackLayout>
+                    <VerticalStackLayout.Spacing>
+                        <OnPlatform x:TypeArguments="x:Double">
+                            <On Platform="Android" Value="10" />
+                            <On Platform="iOS" Value="16" />
+                            <On Platform="WinUI" Value="20" />
+                            <On Platform="MacCatalyst" Value="16" />
+                            <On Platform="Tizen" Value="10" />
+                            <On Platform="Default" Value="20" />
+                        </OnPlatform>
+                    </VerticalStackLayout.Spacing>
 
-            <!-- Name Field -->
-            <Grid ColumnDefinitions="40,*,30" VerticalOptions="Center" HeightRequest="50">
-                <Image Source="name1.png"
-                       Grid.Column="0"
-                       HeightRequest="24"
-                       WidthRequest="24"
-                       VerticalOptions="Center"
-                       HorizontalOptions="Center"/>
-                <Entry Grid.Column="1"
-                       x:Name="NameEntry"
-                       TextColor="Black"
-                       Placeholder="Name"
-                       Style="{StaticResource BaseEntryStyle}" />
-            </Grid>
+                    <!-- Create Text -->
+                    <VerticalStackLayout x:Name="CreateTextContainer">
+                        <Label x:Name="CreateText"
+                               Text="Create Account"
+                               FontFamily="GentySans"
+                               FontSize="38"
+                               TextColor="Black" />
+                    </VerticalStackLayout>
 
-            <!-- Email Field -->
-            <Grid ColumnDefinitions="40,*,30" VerticalOptions="Center" HeightRequest="50">
-                <Image Source="envelope1.png"
-                   Grid.Column="0"
-                   HeightRequest="24"
-                   WidthRequest="24"
-                   VerticalOptions="Center"
-                   HorizontalOptions="Center"/>
-                <Entry Grid.Column="1"
-                   x:Name="EmailEntry"
-                   Style="{StaticResource EmailEntryStyle}" />
-            </Grid>
+                    <!-- Spacer to move other controls lower -->
+                    <BoxView x:Name="CreateSpacer" BackgroundColor="Transparent" Color="Transparent" Opacity="0">
+                        <BoxView.HeightRequest>
+                            <OnPlatform x:TypeArguments="x:Double">
+                                <On Platform="Android" Value="20" />
+                                <On Platform="iOS" Value="40" />
+                                <On Platform="WinUI" Value="20" />
+                                <On Platform="MacCatalyst" Value="40" />
+                                <On Platform="Tizen" Value="20" />
+                                <On Platform="Default" Value="60" />
+                            </OnPlatform>
+                        </BoxView.HeightRequest>
+                    </BoxView>
 
-            <!-- Password Field -->
-            <Grid ColumnDefinitions="40,*,30" VerticalOptions="Center" HeightRequest="50">
-                <Image Source="password1.png"
-                   Grid.Column="0"
-                   HeightRequest="24"
-                   WidthRequest="24"
-                   VerticalOptions="Center"
-                   HorizontalOptions="Center"/>
-                <Entry Grid.Column="1"
-                   x:Name="PasswordEntry"
-                   TextColor="Black"
-                   Style="{StaticResource PasswordEntryStyle}" />
-            </Grid>
+                    <!-- Name Field -->
+                    <Grid ColumnDefinitions="40,*,30" VerticalOptions="Center" HeightRequest="50">
+                        <Image Source="name1.png"
+                               Grid.Column="0"
+                               HeightRequest="24"
+                               WidthRequest="24"
+                               VerticalOptions="Center"
+                               HorizontalOptions="Center"/>
+                        <Entry Grid.Column="1"
+                               x:Name="NameEntry"
+                               Placeholder="Name"
+                               Style="{StaticResource BaseEntryStyle}" />
+                    </Grid>
 
-            <BoxView HeightRequest="5" BackgroundColor="Transparent" Color="Transparent" Opacity="0" />
+                    <!-- Email Field -->
+                    <Grid ColumnDefinitions="40,*,30" VerticalOptions="Center" HeightRequest="50">
+                        <Image Source="envelope1.png"
+                           Grid.Column="0"
+                           HeightRequest="24"
+                           WidthRequest="24"
+                           VerticalOptions="Center"
+                           HorizontalOptions="Center"/>
+                        <Entry Grid.Column="1"
+                           x:Name="EmailEntry"
+                           Placeholder="Email"
+                           Style="{StaticResource BaseEntryStyle}" />
+                    </Grid>
 
-            <!-- Sign Up Button -->
-            <Button Text="⭐  Sign Up"
-                    Style="{StaticResource LightButtonStyle}"
-                    HorizontalOptions="Center"
-                    VerticalOptions="Center"
-                    Clicked="OnSignUpClicked"/>
+                    <!-- Password Field -->
+                    <Grid ColumnDefinitions="40,*,30" VerticalOptions="Center" HeightRequest="50">
+                        <Image Source="password1.png"
+                           Grid.Column="0"
+                           HeightRequest="24"
+                           WidthRequest="24"
+                           VerticalOptions="Center"
+                           HorizontalOptions="Center"/>
+                        <Entry Grid.Column="1"
+                           x:Name="PasswordEntry"
+                           Placeholder="Password"
+                           IsPassword="True"
+                           Style="{StaticResource BaseEntryStyle}" />
+                    </Grid>
 
-            <!-- OR Separator -->
-            <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
-                <BoxView WidthRequest="120" HeightRequest="1" BackgroundColor="Black" VerticalOptions="Center"/>
-                <Label Text="or" FontFamily="Arial" FontSize="14" VerticalOptions="Center"/>
-                <BoxView WidthRequest="120" HeightRequest="1" BackgroundColor="Black" VerticalOptions="Center"/>
-            </HorizontalStackLayout>
+                    <!-- Reduced spacing between password and terms -->
+                    <BoxView HeightRequest="2" BackgroundColor="Transparent" Color="Transparent" Opacity="0" />
 
-            <!-- Log in Button -->
-            <Button Text="⭐  Log in"
-                    Style="{StaticResource DarkButtonStyle}"
-                    HorizontalOptions="Center"
-                    VerticalOptions="Center"
-                    Clicked="LoginBalik_Clicked"/>
+                    <!-- Terms and Conditions Checkbox -->
+                    <HorizontalStackLayout Spacing="10" VerticalOptions="Center">
+                        <CheckBox x:Name="TermsCheckbox" 
+                                 Color="#FF69B4"
+                                 BackgroundColor="Transparent"
+                                 VerticalOptions="Center"/>
+                        <Label Text="I agree to the Terms and Conditions"
+                               FontFamily="Arial"
+                               FontSize="14"
+                               VerticalOptions="Center"
+                               TextColor="Black">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnTermsTapped"/>
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </HorizontalStackLayout>
 
-        </VerticalStackLayout>
-    </ScrollView>
+                    <!-- Sign Up Button -->
+                    <Button Text="⭐  Sign Up"
+                            Style="{StaticResource LightButtonStyle}"
+                            Clicked="OnSignUpClicked"
+                            Padding="50,0"/>
+
+                    <!-- OR Separator -->
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                        <BoxView WidthRequest="120" HeightRequest="1" BackgroundColor="Black" VerticalOptions="Center"/>
+                        <Label Text="or" FontFamily="Arial" FontSize="14" VerticalOptions="Center"/>
+                        <BoxView WidthRequest="120" HeightRequest="1" BackgroundColor="Black" VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+
+                    <!-- Log in Button -->
+                    <Button Text="⭐  Log in"
+                            Style="{StaticResource DarkButtonStyle}"
+                            Clicked="LoginBalik_Clicked"/>
+                </VerticalStackLayout>
+            </ScrollView>
+        </Frame>
+    </Grid>
 </ContentPage>

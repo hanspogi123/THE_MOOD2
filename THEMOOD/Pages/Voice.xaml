@@ -14,7 +14,7 @@
         <converters:BoolToAlignmentConverter x:Key="BoolToAlignmentConverter"/>
     </ContentView.Resources>
 
-    <Grid RowDefinitions="Auto, *, Auto" Padding="20" BackgroundColor="#f8f8f8">
+    <Grid RowDefinitions="Auto, *, Auto" BackgroundColor="#f8f8f8">
         <!-- Header -->
         <Grid Grid.Row="0" 
               ColumnDefinitions="*, Auto, Auto" 

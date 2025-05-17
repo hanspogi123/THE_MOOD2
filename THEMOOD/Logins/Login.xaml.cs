@@ -18,6 +18,12 @@ public partial class Login : ContentPage
         LoginCard.BackgroundColor = Colors.White;
         LoginCard.HasShadow = true;
         LoginCard.Padding = new Thickness(36, 32);
+        LoginCard.BorderColor = Colors.HotPink;
+        // Center welcome text for Windows
+        WelcomeTextContainer.HorizontalOptions = LayoutOptions.Center;
+        WelcomeText.HorizontalOptions = LayoutOptions.Center;
+        // Reduce space below welcome text for Windows
+        WelcomeSpacer.HeightRequest = 20;
 #else
         LoginCard.Style = null;
         LoginCard.BackgroundColor = Colors.Transparent;
@@ -32,6 +38,9 @@ public partial class Login : ContentPage
         {
             var auth = await _authService.SignIn(Email.Text, Password.Text);
             string token = await _authService.GetFreshToken(auth);
+            
+            // Store user information
+            UserService.Instance.SetCurrentUser(token, auth.User);
             
             // Initialize MoodEntryService with user ID
             MoodEntryService.Instance.Initialize(auth.User.LocalId);

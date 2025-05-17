@@ -31,6 +31,30 @@
                            FontFamily="GentySans"
                            TextColor="Gray"
                            HorizontalOptions="Center"/>
+
+                    <!-- User Information Section -->
+                    <BoxView HeightRequest="1" 
+                            BackgroundColor="#E0E0E0" 
+                            Margin="0,10"/>
+
+                    <Label x:Name="UserNameLabel"
+                           FontSize="20"
+                           FontFamily="GentySans"
+                           FontAttributes="Bold"
+                           TextColor="#FF69B4"
+                           HorizontalOptions="Center"/>
+
+                    <Label x:Name="UserEmailLabel"
+                           FontSize="16"
+                           FontFamily="GentySans"
+                           TextColor="Gray"
+                           HorizontalOptions="Center"/>
+
+                    <!-- Quick Actions Section -->
+                    <BoxView HeightRequest="1" 
+                            BackgroundColor="#E0E0E0" 
+                            Margin="0,10"/>
+ 
                 </VerticalStackLayout>
             </Frame>
         </Grid>

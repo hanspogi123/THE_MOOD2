@@ -26,19 +26,16 @@
                BackgroundColor="Transparent">
             <VerticalStackLayout Spacing="20">
                 <!-- Welcome Text -->
-                <VerticalStackLayout>
-                    <Label Text="Welcome"
-                           FontFamily="GentySans"
-                           FontSize="38"
-                           TextColor="Black" />
-                    <Label Text="Back!"
+                <VerticalStackLayout x:Name="WelcomeTextContainer">
+                    <Label x:Name="WelcomeText"
+                           Text="Welcome Back!"
                            FontFamily="GentySans"
                            FontSize="38"
                            TextColor="Black" />
                 </VerticalStackLayout>
 
                 <!-- Spacer to move other controls lower -->
-                <BoxView HeightRequest="60" BackgroundColor="Transparent" Color="Transparent" Opacity="0" />
+                <BoxView x:Name="WelcomeSpacer" HeightRequest="60" BackgroundColor="Transparent" Color="Transparent" Opacity="0" />
 
                 <!-- Email Field -->
                 <Grid ColumnDefinitions="40,*,30" VerticalOptions="Center" HeightRequest="50">
